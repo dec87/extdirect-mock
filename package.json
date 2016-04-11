@@ -1,0 +1,25 @@
+{
+  "name": "extdirect-mock",
+  "description": "Mocking Ext.direct",
+  "keywords": [
+    "extjs",
+    "extdirect",
+    "mock",
+    "ext",
+    "js"
+  ],
+  "version": "1.0.0",
+  "main": "./extdirectmock.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dec87/extdirect-mock"
+  },
+  "author": {
+    "name": "Damian Celmer",
+    "email": "damian.celmer@gmail.com"
+  },
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/dec87/extdirect-mock/issues"
+  }
+}
