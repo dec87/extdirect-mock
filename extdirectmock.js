@@ -1,6 +1,7 @@
 var ExtDirectMock = function() {
     return {
         init: function(config) {
+            var debug = !!config.debug;
             var fakeServer = sinon.fakeServer.create({
                 autoRespond: true
             });
@@ -10,8 +11,10 @@ var ExtDirectMock = function() {
                 var genereResultFunction = config.responseData[params.action][params.method] || function() {};
                 var result = genereResultFunction.apply(this, params.data || []);
 
-                console.log('EXT.DIRECT REQUEST: ', params);
-                console.log('EXT.DIRECT RESPONSE: ', result);
+                if(debug) {
+                    console.log('EXT.DIRECT REQUEST: ', params);
+                    console.log('EXT.DIRECT RESPONSE: ', result);
+                }
 
                 request.respond(200, {
                     'Content-Type': 'application/json'
@@ -48,7 +51,7 @@ var ExtDirectMock = function() {
                 actions: actions,
                 timeout: 1000,
                 enableBuffer: false,
-                namespace: "Mock.api"
+                namespace: config.namespace || "Mock.api"
 
             });
         }
