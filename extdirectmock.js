@@ -1,8 +1,10 @@
 var ExtDirectMock = function() {
+    var debug = null;
+    var fakeServer = null;
     return {
         init: function(config) {
-            var debug = !!config.debug;
-            var fakeServer = sinon.fakeServer.create({
+            debug = !!config.debug;
+            fakeServer = sinon.fakeServer.create({
                 autoRespond: true
             });
 
@@ -54,6 +56,9 @@ var ExtDirectMock = function() {
                 namespace: config.namespace || "Mock.api"
 
             });
+        },
+        restore: function() {
+            fakeServer.restore();
         }
     }
 }
