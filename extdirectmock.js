@@ -1,14 +1,18 @@
 var ExtDirectMock = function() {
     var debug = null;
     var fakeServer = null;
+    var mockUrl = /mock\-direct/;
     return {
         init: function(config) {
             debug = !!config.debug;
             fakeServer = sinon.fakeServer.create({
                 autoRespond: true
             });
-
-            fakeServer.respondWith('POST', /mock\-direct/, function (request) {
+            fakeServer.xhr.useFilters = true;
+            fakeServer.xhr.addFilter(function (method, url) {
+            	return !url.match(mockUrl);
+            });
+            fakeServer.respondWith('POST', mockUrl, function (request) {
                 var params = JSON.parse(request.requestBody);
                 var genereResultFunction = config.responseData[params.action][params.method] || function() {};
                 var result = genereResultFunction.apply(this, params.data || []);
