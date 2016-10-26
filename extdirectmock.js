@@ -2,6 +2,7 @@ var ExtDirectMock = function() {
     var debug = null;
     var fakeServer = null;
     var mockUrl = /mock\-direct/;
+    var filteredUrlArray = [];
     return {
         init: function(config) {
             debug = !!config.debug;
@@ -10,28 +11,41 @@ var ExtDirectMock = function() {
             });
             fakeServer.xhr.useFilters = true;
             fakeServer.xhr.addFilter(function (method, url) {
-            	return !url.match(mockUrl);
+                return !(filteredUrlArray.filter(function(filteredUrl) {
+                    return url.match(filteredUrl) !== null;
+                }).length > 0 || url.match(mockUrl) !== null);
             });
             fakeServer.respondWith('POST', mockUrl, function (request) {
                 var params = JSON.parse(request.requestBody);
                 var genereResultFunction = config.responseData[params.action][params.method] || function() {};
                 var result = genereResultFunction.apply(this, params.data || []);
+                var response = {
+                    tid: params.tid,
+                    action: params.action,
+                    method: params.method,
+		    type: 'rpc'
+                }
 
-                if(debug) {
+		if(typeof result.type !== 'undefined') {
+		    response.type =  result.type;
+		    response.message = result.message || '';
+		    response.where = result.where || '';
+		
+		    delete result.type;
+		    delete result.message;
+		    delete result.where;
+		}
+		
+		response.result = result;
+		
+		if(debug) {
                     console.log('EXT.DIRECT REQUEST: ', params);
-                    console.log('EXT.DIRECT RESPONSE: ', result);
+                    console.log('EXT.DIRECT RESPONSE: ', response);
                 }
 
                 request.respond(200, {
                     'Content-Type': 'application/json'
-                }, JSON.stringify({
-                    type: 'rpc',
-                    tid: params.tid,
-                    action: params.action,
-                    method: params.method,
-                    result: result
-
-                }));
+                }, JSON.stringify(response));
             });
 
             var actions = {};
@@ -63,6 +77,16 @@ var ExtDirectMock = function() {
         },
         restore: function() {
             fakeServer.restore();
+        },
+        respondWith: function() {
+            if(arguments.length === 2) {
+                url = arguments[0];
+            }
+            if(arguments.length === 3) {
+                url = arguments[1];
+            }
+            filteredUrlArray.push(url);
+            fakeServer.respondWith.apply(fakeServer, arguments);
         }
     }
 }
